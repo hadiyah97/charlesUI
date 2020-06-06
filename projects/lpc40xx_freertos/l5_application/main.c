@@ -19,10 +19,12 @@ typedef enum {
   B_LEFT,
   B_RIGHT,
   CLOCKWISE,
-  ANTICLOCKWISE
+  ANTICLOCKWISE,
+  STOP
 } move_state;
 
 move_state state = FORWARD;
+move_state lastState = FORWARD;
 uint8_t speed = 0;
 
 gpio_s dir0, dir1, dir2, dir3, pwm0, pwm1, pwm2, pwm3;
@@ -71,6 +73,13 @@ void motor_task(void *params) {
   while (1) {
 
     if (xSemaphoreTake(state_sem, 0)) {
+
+      pwm1__set_duty_cycle(PWM1__2_0, 0);
+      pwm1__set_duty_cycle(PWM1__2_1, 0);
+      pwm1__set_duty_cycle(PWM1__2_2, 0);
+      pwm1__set_duty_cycle(PWM1__2_4, 0);
+      vTaskDelay(200);
+
       switch (state) {
       case FORWARD: // 1111
         fprintf(stderr, "FORWARD\n");
@@ -204,6 +213,14 @@ void motor_task(void *params) {
         pwm1__set_duty_cycle(PWM1__2_4, speed);
 
         break;
+      case STOP:
+        pwm1__set_duty_cycle(PWM1__2_0, 0);
+        pwm1__set_duty_cycle(PWM1__2_1, 0);
+        pwm1__set_duty_cycle(PWM1__2_2, 0);
+        pwm1__set_duty_cycle(PWM1__2_4, 0);
+        // vTaskDelay(200);
+        fprintf(stderr, "STOP\n");
+        break;
       default:
         break;
       }
@@ -213,8 +230,14 @@ void motor_task(void *params) {
 
 void state_task(void *params) {
   while (1) {
-    for (int i = 0; i < 10; i++) {
-      state++;
+    for (int i = 0; i < 20; i++) {
+      if (i % 2 == 0) {
+        lastState = state;
+        state = STOP;
+      } else if (i % 2 == 1) {
+        state = lastState;
+        state++;
+      }
       xSemaphoreGive(state_sem);
       vTaskDelay(1000);
     }
