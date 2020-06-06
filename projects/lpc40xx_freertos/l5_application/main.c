@@ -10,21 +10,21 @@
 SemaphoreHandle_t state_sem;
 
 typedef enum {
-  FORWARD = 0,
+  STOP = 0,
+  FORWARD,
   BACKWARD,
   LEFT,
   RIGHT,
   F_LEFT,
-  F_RIGHT,
   B_LEFT,
+  F_RIGHT,
   B_RIGHT,
   CLOCKWISE,
-  ANTICLOCKWISE,
-  STOP
+  ANTICLOCKWISE
 } move_state;
 
-move_state state = FORWARD;
-move_state lastState = FORWARD;
+move_state state = STOP;
+move_state lastState = STOP;
 uint8_t speed = 0;
 
 gpio_s dir0, dir1, dir2, dir3, pwm0, pwm1, pwm2, pwm3;
@@ -241,7 +241,7 @@ void state_task(void *params) {
       xSemaphoreGive(state_sem);
       vTaskDelay(1000);
     }
-    state = FORWARD;
+    state = STOP;
     xSemaphoreGive(state_sem);
     vTaskDelay(1000);
   }
