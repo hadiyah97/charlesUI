@@ -1,13 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "adc.h"
 #include "gpio.h"
 #include "pwm1.h"
+#include "queue.h"
 #include "semphr.h"
+#include "uart.h"
 
 SemaphoreHandle_t state_sem;
+static QueueHandle_t rx_q, tx_q;
 
 typedef enum {
   STOP = 0,
@@ -27,24 +32,65 @@ move_state state = STOP;
 move_state lastState = STOP;
 uint8_t speed = 0;
 
-gpio_s dir0, dir1, dir2, dir3, pwm0, pwm1, pwm2, pwm3;
+gpio_s dir0, dir1, dir2, dir3, pwm0, pwm1, pwm2, pwm3, us0, tx, rx;
+
+char readVal;
 
 void motor_task(void *params);
 void demo_motor_task(void *params);
-void state_task(void *params);
+void cycle_state_task(void *params);
+void ultrasonic_task(void *params);
+void uart_test_task(void *params);
 
 int main(void) {
 
   state_sem = xSemaphoreCreateBinary();
 
+  rx_q = xQueueCreate(15, sizeof(char));
+  tx_q = xQueueCreate(15, sizeof(char));
+
+  xTaskCreate(uart_test_task, "uart test task", (4096 / sizeof(void *)), NULL, 2, NULL);
+
   xTaskCreate(motor_task, "motor task", (4096 / sizeof(void *)), NULL, 1, NULL);
-  xTaskCreate(state_task, "state task", (4096 / sizeof(void *)), NULL, 2, NULL);
+  // xTaskCreate(cycle_state_task, "state task", (4096 / sizeof(void *)), NULL, 2, NULL);
   // xTaskCreate(demo_motor_task, "demo motor task", (4096 / sizeof(void *)), NULL, 1, NULL);
 
   printf("Created Task, Starting Scheduler\n");
   vTaskStartScheduler();
 
   return -1;
+}
+
+void uart_test_task(void *params) {
+  tx = gpio__construct_with_function(GPIO__PORT_0, 0, 2);
+  rx = gpio__construct_with_function(GPIO__PORT_0, 1, 2);
+
+  const uint32_t pclkspeed = clock__get_core_clock_hz();
+  uart__init(UART__3, pclkspeed, 115200);
+
+  uart__enable_queues(UART__3, rx_q, tx_q);
+
+  while (1) {
+    printf("\n");
+
+    if (xQueueReceive(rx_q, &readVal, portMAX_DELAY)) {
+      // printf("%c\n", readVal);
+      state = (readVal - '0');
+      xSemaphoreGive(state_sem);
+      // printf("state = %d\n", state);
+    }
+
+    // bool stat = uart__polled_get(UART__3, &readVal);
+    // printf("stat: %d \n", stat);
+
+    //   if (stat == 0) {
+    //     for (int i = 0; i < 15; i++) {
+    //       printf("%c", rx_q[i]);
+    //     }
+    //     printf("\n");
+    //   }
+    //   vTaskDelay(500);
+  }
 }
 
 void motor_task(void *params) {
@@ -68,7 +114,7 @@ void motor_task(void *params) {
   // initialize pwm module
   pwm1__init_single_edge(1000);
 
-  speed = 70;
+  speed = 40;
 
   while (1) {
 
@@ -228,7 +274,7 @@ void motor_task(void *params) {
   }
 }
 
-void state_task(void *params) {
+void cycle_state_task(void *params) {
   while (1) {
     for (int i = 0; i < 20; i++) {
       if (i % 2 == 0) {
@@ -239,11 +285,11 @@ void state_task(void *params) {
         state++;
       }
       xSemaphoreGive(state_sem);
-      vTaskDelay(1000);
+      vTaskDelay(2000);
     }
     state = STOP;
     xSemaphoreGive(state_sem);
-    vTaskDelay(1000);
+    vTaskDelay(2000);
   }
 }
 
@@ -292,6 +338,19 @@ void demo_motor_task(void *params) {
     // stop motor
     printf("0%% duty (stopped)\n");
     pwm1__set_duty_cycle(PWM1__2_5, 0);
+    vTaskDelay(500);
+  }
+}
+
+void ultrasonic_task(void *params) {
+
+  adc__initialize();
+  us0 = gpio__construct_with_function(GPIO__PORT_1, 31, 3);
+  uint16_t us_val = 0;
+
+  while (1) {
+    us_val = adc__get_adc_value(5);
+    fprintf(stderr, "value: %d", us_val);
     vTaskDelay(500);
   }
 }
