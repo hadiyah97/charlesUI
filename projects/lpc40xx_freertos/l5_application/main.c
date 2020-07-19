@@ -6,12 +6,14 @@
 
 #include "adc.h"
 #include "gpio.h"
+#include "lpc_peripherals.h"
 #include "pwm1.h"
+#include "qei.h"
 #include "queue.h"
 #include "semphr.h"
 #include "uart.h"
 
-SemaphoreHandle_t state_sem;
+SemaphoreHandle_t state_sem; // encoder_sem;
 static QueueHandle_t rx_q, tx_q;
 
 typedef enum {
@@ -28,32 +30,42 @@ typedef enum {
   ANTICLOCKWISE
 } move_state;
 
-move_state state = STOP;
+move_state state = FORWARD;
 move_state lastState = STOP;
 uint8_t speed = 0;
 
-gpio_s dir0, dir1, dir2, dir3, pwm0, pwm1, pwm2, pwm3, us0, tx, rx;
+gpio_s dir0, dir1, dir2, dir3, pwm0, pwm1, pwm2, pwm3, us0, tx, rx, qei_pha, qei_phb;
 
 char readVal;
+
+double position[] = {0.0, 0.0};
 
 void motor_task(void *params);
 void demo_motor_task(void *params);
 void cycle_state_task(void *params);
 void ultrasonic_task(void *params);
 void uart_test_task(void *params);
+void encoder_task(void *params);
+void compare0_isr(void);
 
 int main(void) {
 
   state_sem = xSemaphoreCreateBinary();
+  // encoder_sem = xSemaphoreCreateBinary();
 
   rx_q = xQueueCreate(15, sizeof(char));
   tx_q = xQueueCreate(15, sizeof(char));
 
-  xTaskCreate(uart_test_task, "uart test task", (4096 / sizeof(void *)), NULL, 2, NULL);
+  lpc_peripheral__turn_on_power_to(LPC_PERIPHERAL__QEI);
 
-  xTaskCreate(motor_task, "motor task", (4096 / sizeof(void *)), NULL, 1, NULL);
+  lpc_peripheral__enable_interrupt(LPC_PERIPHERAL__QEI, compare0_isr, "encoder_interrupt");
+
+  // xTaskCreate(uart_test_task, "uart test task", (4096 / sizeof(void *)), NULL, 2, NULL);
+
+  // xTaskCreate(motor_task, "motor task", (4096 / sizeof(void *)), NULL, 1, NULL);
+  // xTaskCreate(demo_encoder_task, "demo encoder task", (4096 / sizeof(void *)), NULL, 1, NULL);
   // xTaskCreate(cycle_state_task, "state task", (4096 / sizeof(void *)), NULL, 2, NULL);
-  // xTaskCreate(demo_motor_task, "demo motor task", (4096 / sizeof(void *)), NULL, 1, NULL);
+  xTaskCreate(demo_motor_task, "demo motor task", (4096 / sizeof(void *)), NULL, 1, NULL);
 
   printf("Created Task, Starting Scheduler\n");
   vTaskStartScheduler();
@@ -114,9 +126,22 @@ void motor_task(void *params) {
   // initialize pwm module
   pwm1__init_single_edge(1000);
 
+  // initialize encoders
+  uint32_t ticks = 0x55; // every 85 ticks is 0.1 change in position
+
+  qei_init(ticks);
+
+  qei_enable_interrupt(MAXPOS_INT);
+
+  qei_pha = gpio__construct_with_function(GPIO__PORT_1, 20, 3);
+  qei_phb = gpio__construct_with_function(GPIO__PORT_1, 23, 3);
+  // printf("encoder task initialized\n");
+
   speed = 40;
 
   while (1) {
+
+    printf("position: (%f, %f)\n", position[0], position[1]);
 
     if (xSemaphoreTake(state_sem, 0)) {
 
@@ -294,50 +319,130 @@ void cycle_state_task(void *params) {
 }
 
 void demo_motor_task(void *params) {
+  pwm0 = gpio__construct_with_function(GPIO__PORT_2, 0, 1);
+  dir0 = gpio__construct_with_function(GPIO__PORT_2, 5, 0);
+
+  gpio__set_as_output(dir0);
 
   pwm1__init_single_edge(1000);
+
+  // initialize encoders
+  uint32_t ticks = 0x55; // every 85 ticks is 0.1 change in position
+
+  qei_init(ticks);
+
+  qei_enable_interrupt(MAXPOS_INT);
+
+  qei_pha = gpio__construct_with_function(GPIO__PORT_1, 20, 3);
+  qei_phb = gpio__construct_with_function(GPIO__PORT_1, 23, 3);
+  // printf("encoder task initialized\n");
 
   printf("Done with motor function setup, entering loop\n");
 
   while (1) {
-    // forward ramp up
+    for (int i = 0; i < 2; i++) {
+      state = (i == 0) ? FORWARD : RIGHT;
+
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      // forward ramp up and down
+      gpio__set(dir0);
+
+      printf("20%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 20);
+      vTaskDelay(1500); // 1500ms
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("50%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 50);
+      vTaskDelay(1500);
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("80%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 80);
+      vTaskDelay(1500);
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("50%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 50);
+      vTaskDelay(1500);
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("20%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 20);
+      vTaskDelay(1500); // 1500ms
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      // stop motor
+      printf("0%% duty (stopped)\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 0);
+      vTaskDelay(500);
+
+      state = (i == 0) ? BACKWARD : LEFT;
+
+      // reverse ramp up and down
+      gpio__reset(dir0);
+
+      printf("20%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 20);
+      vTaskDelay(1500); // 1500ms
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("50%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 50);
+      vTaskDelay(1500);
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("80%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 80);
+      vTaskDelay(1500);
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("50%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 50);
+      vTaskDelay(1500);
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      printf("20%% duty\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 20);
+      vTaskDelay(1500); // 1500ms
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+
+      // stop motor
+      printf("0%% duty (stopped)\n");
+      pwm1__set_duty_cycle(PWM1__2_0, 0);
+      vTaskDelay(500);
+      fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
+    }
+  }
+}
+
+void demo_encoder_task(void *params) {
+
+  pwm0 = gpio__construct_with_function(GPIO__PORT_2, 0, 1);
+  dir0 = gpio__construct_with_function(GPIO__PORT_2, 5, 0);
+
+  gpio__set_as_output(dir0);
+
+  pwm1__init_single_edge(1000);
+
+  // initialize encoders
+  uint32_t ticks = 0x55; // every 85 ticks is 0.1 change in position
+
+  qei_init(ticks);
+
+  qei_enable_interrupt(MAXPOS_INT);
+
+  qei_pha = gpio__construct_with_function(GPIO__PORT_1, 20, 3);
+  qei_phb = gpio__construct_with_function(GPIO__PORT_1, 23, 3);
+  // printf("encoder task initialized\n");
+
+  while (1) {
+
     gpio__set(dir0);
+    pwm1__set_duty_cycle(PWM1__2_0, 20);
 
-    printf("20%% duty\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 20);
-    vTaskDelay(1500); // 1500ms
-
-    printf("50%% duty\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 50);
-    vTaskDelay(1500);
-
-    printf("80%% duty\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 80);
-    vTaskDelay(1500);
-
-    // stop motor
-    printf("0%% duty (stopped)\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 0);
-    vTaskDelay(500);
-
-    // reverse ramp up
-    gpio__reset(dir0);
-
-    printf("20%% duty\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 20);
-    vTaskDelay(1500); // 1500ms
-
-    printf("50%% duty\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 50);
-    vTaskDelay(1500);
-
-    printf("80%% duty\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 80);
-    vTaskDelay(1500);
-
-    // stop motor
-    printf("0%% duty (stopped)\n");
-    pwm1__set_duty_cycle(PWM1__2_5, 0);
+    fprintf(stderr, "position: (%f, %f)\n", position[0], position[1]);
     vTaskDelay(500);
   }
 }
@@ -353,4 +458,30 @@ void ultrasonic_task(void *params) {
     fprintf(stderr, "value: %d", us_val);
     vTaskDelay(500);
   }
+}
+
+void compare0_isr(void) {
+  long yield = 0;
+
+  qei_clear_interrupt(MAXPOS_INT);
+
+  switch (state) {
+  case FORWARD:
+    position[0] += 0.1;
+    break;
+  case BACKWARD:
+    position[0] -= 0.1;
+    break;
+  case RIGHT:
+    position[1] += 0.1;
+    break;
+  case LEFT:
+    position[1] -= 0.1;
+    break;
+  default:
+    break;
+  }
+
+  // xSemaphoreGiveFromISR(encoder_sem, &yield);
+  portYIELD_FROM_ISR(yield);
 }
