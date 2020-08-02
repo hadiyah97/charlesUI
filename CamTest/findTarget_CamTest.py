@@ -10,6 +10,7 @@ Cap = Camera("WebCam", "0", 1)
 #Cap = Camera("WebCam", "1", 2)
 
 Cap.findTarget()
+#Cap.findTarget2(206)
 Cap.stopCapturing()
 cv2.destroyAllWindows()
 
