@@ -34,16 +34,20 @@
 
 
 class Node:
-    def __init__(self, row, column, distance_from_start=None):
+    def __init__(self, row, column, distance_from_start=None, previous=None):
         self.row = row
         self.column = column
+        if previous is None:
+            self.previous = None
+        else:
+            self.previous = previous
         if distance_from_start is None:
             self.distance_from_start = 0
         else:
             self.distance_from_start = distance_from_start
 
     def __repr__(self):
-        return f"Node({self.row}, {self.column}), Distance({self.distance_from_start})"
+        return f"({self.row}, {self.column})\n"
 
     def __eq__(self, other):
         try:
@@ -76,6 +80,7 @@ def get_shortest_path(matrix, start, end):
     r = 0
     c = 0
     while r < MAX_ROW:
+        c = 0
         while c < MAX_COL:
             if(get_node_value(matrix, r, c)) == INACCESSIBLE:
                 explored_nodes[r][c] = True
@@ -93,26 +98,44 @@ def get_shortest_path(matrix, start, end):
         current_path.remove(current_node)
 
         if current_node == end:
-            return current_node.distance_from_start
+            # reached the destinatio, now print the path.
+            distance = current_node.distance_from_start
+
+            # Using the 'previous' to print the path, so first need to reverse the order.
+            # Get all the nodes that are in that path.
+            node_order = []
+            node_order.append(current_node)
+            while current_node.previous is not None:  # None indicates that the 'start' node has been reached.
+                node_order.append(current_node.previous)
+                current_node = current_node.previous
+            node_order.reverse()  # reverse the nodes to get the correct order beginning with the start node
+
+            # now print the path in the correct order.
+            list_length = len(node_order)
+            i = 0
+            while i < list_length:
+                print(node_order[i])
+                i = i + 1
+            return distance
 
         # check if the neighbor above likes to be visited.
         if ((current_node.row-1) >= MIN_ROW) and (explored_nodes[current_node.row-1][current_node.column] is False):
-            current_path.append(Node(current_node.row - 1, current_node.column, current_node.distance_from_start + 1))
+            current_path.append(Node(current_node.row-1, current_node.column, current_node.distance_from_start+1, current_node))
             explored_nodes[current_node.row - 1][current_node.column] = True
 
         # check if the neighbor below likes to be visited.
         if ((current_node.row+1) < MAX_ROW) and (explored_nodes[current_node.row+1][current_node.column] is False):
-            current_path.append(Node(current_node.row + 1, current_node.column, current_node.distance_from_start + 1))
+            current_path.append(Node(current_node.row + 1, current_node.column, current_node.distance_from_start + 1, current_node))
             explored_nodes[current_node.row + 1][current_node.column] = True
 
         # check if the neighbor to the left likes to be visited.
         if ((current_node.column-1) >= MIN_COL) and (explored_nodes[current_node.row][current_node.column-1] is False):
-            current_path.append(Node(current_node.row, current_node.column - 1, current_node.distance_from_start + 1))
+            current_path.append(Node(current_node.row, current_node.column - 1, current_node.distance_from_start + 1, current_node))
             explored_nodes[current_node.row][current_node.column - 1] = True
 
         # check if the neighbor to the right likes to be visited.
         if ((current_node.column+1) < MAX_COL) and (explored_nodes[current_node.row][current_node.column+1] is False):
-            current_path.append(Node(current_node.row, current_node.column + 1, current_node.distance_from_start + 1))
+            current_path.append(Node(current_node.row, current_node.column + 1, current_node.distance_from_start + 1, current_node))
             explored_nodes[current_node.row][current_node.column + 1] = True
 
     return -1
@@ -127,5 +150,5 @@ if __name__ == '__main__':
         [0, 1, 1, 1, 1],  # 3
         [0, 1, 1, 0, 1]   # 4
     ]
-    final_path = get_shortest_path(data, Node(0, 0, 0), Node(4, 2))
+    final_path = get_shortest_path(data, Node(0, 0, 0), Node(3, 4))
     print(f"Shortest distance from start to end: {final_path}")
