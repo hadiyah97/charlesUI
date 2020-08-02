@@ -1,6 +1,6 @@
-# Indoor Autonomous Service Robot: *Charles*
+## Indoor Autonomous Service Robot: *Charles*
 
-### THE STORY
+#### THE STORY
 
 *Charles* was an indoor autonomous service robot. Its purpose in the grand scheme of the Universe was simply to
 
@@ -14,7 +14,7 @@ Despite the hardships, *Charles* never lost sight of its purpose of delivering a
 
 ------
 
-### DESIGN DETAILS
+#### DESIGN DETAILS
 
 ###### The Genesis
 
@@ -46,7 +46,7 @@ Despite the hardships, *Charles* never lost sight of its purpose of delivering a
 
 ----------------------------
 
-### ASSEMBLY
+#### ASSEMBLY
 
 ###### Mechanical parts: The body
 
@@ -62,7 +62,7 @@ Despite the hardships, *Charles* never lost sight of its purpose of delivering a
 
 ----
 
-### SOME WORKAROUNDS
+#### SOME WORKAROUNDS
 
 ###### TBD
 
@@ -70,7 +70,7 @@ Despite the hardships, *Charles* never lost sight of its purpose of delivering a
 
 --------
 
-### THE CODE
+#### THE CODE
 
 TODO: guide on how to access different parts of the code that made Charles.
 
