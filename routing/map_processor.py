@@ -32,6 +32,16 @@
 # Empty spaces are areas that people can move in;
 # Whereas marked areas represent walls or objects on the floor that prevent passage.
 
+# UPDATE THE LAYOUT HERE
+data = [
+    # 0  1  2  3  4
+    [1, 0, 1, 0, 1],  # 0
+    [1, 1, 1, 0, 0],  # 1
+    [0, 1, 1, 0, 0],  # 2
+    [0, 1, 1, 1, 1],  # 3
+    [0, 1, 1, 0, 1]   # 4
+]
+
 
 class Node:
     def __init__(self, row, column, distance_from_start=None, previous=None):
@@ -54,6 +64,14 @@ class Node:
             return (self.row == other.row) and (self.column == other.column)
         except:
             return False
+
+
+# SPECIFY THE COORDINATES OF LOCATIONS THAT YOU WANT TO BE ABLE TO MAKE DELIVERIES TO
+where_is_everything = {
+    "224": Node(2, 2),
+    "225": Node(4, 2),
+    "223": Node(1, 0)
+}
 
 
 def get_node_value(matrix, node_row, node_column):
@@ -141,14 +159,15 @@ def get_shortest_path(matrix, start, end):
     return -1
 
 
+def get_directions(start_row, start_column, dest_room):
+    if dest_room not in where_is_everything:
+        print('Invalid destination was chosen. Please try again.\n')
+    else:
+        get_shortest_path(data, Node(start_row, start_column), where_is_everything[dest_room])
+
+
 if __name__ == '__main__':
-    data = [
-        # 0  1  2  3  4
-        [1, 0, 1, 0, 1],  # 0
-        [1, 1, 1, 0, 0],  # 1
-        [0, 1, 1, 0, 0],  # 2
-        [0, 1, 1, 1, 1],  # 3
-        [0, 1, 1, 0, 1]   # 4
-    ]
-    final_path = get_shortest_path(data, Node(0, 0, 0), Node(3, 4))
+    # get_directions(2, 1, "223")
+    print("Debug mode: Getting directions from (0, 0) to Room 225.")
+    final_path = get_shortest_path(data, Node(0, 0, 0), where_is_everything["225"])
     print(f"Shortest distance from start to end: {final_path}")
