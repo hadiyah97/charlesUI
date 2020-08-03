@@ -346,6 +346,8 @@ class Camera:
 
         cnt = 1
         match = 0
+        numOut = 0
+        res = False
         while True:
             self.captureFrame()
 
@@ -390,18 +392,21 @@ class Camera:
                 text = "".join([c if ord(c) < 128 else "" for c in text]).strip()
                 if text.isdigit():
                     if int(text) == dest:
+                        numOut = int(text)
                         match += 1
+
 
             if cnt == 5:
                 if match >= int(cnt/2):
-                    #print(int(cnt/2))
-                    #print(cnt)
-                    #print(match)
-                    print("[INFO]\tDestination Found")
+                    print("Destination Found")
+                    print(numOut)
+                    res = True
                     break
                 cnt = 0
                 match = 0              
             cnt += 1
+
+        return res
             
 
 
