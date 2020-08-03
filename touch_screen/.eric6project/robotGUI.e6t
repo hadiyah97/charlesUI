@@ -1,16 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Tasks SYSTEM "Tasks-6.0.dtd">
 <!-- eric6 tasks file for project robotGUI -->
-<!-- Saved: 2020-08-03, 11:52:32 -->
+<!-- Saved: 2020-08-03, 16:43:28 -->
 <Tasks version="6.0">
   <ProjectScanFilter></ProjectScanFilter>
-  <Task priority="1" completed="False" type="1" uid="{e1446a45-4121-4bf9-bf18-8471f392ccfd}">
+  <Task priority="1" completed="False" type="1" uid="{c75d1d51-5113-48b2-8d10-157b272f939b}">
     <Summary>TODO: not implemented yet</Summary>
     <Description></Description>
-    <Created>2020-08-03, 11:51:15</Created>
+    <Created>2020-08-03, 16:43:25</Created>
     <Resource>
       <Filename>ui/mainWindow.py</Filename>
-      <Linenumber>39</Linenumber>
+      <Linenumber>45</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{2a49b51a-e3f1-4299-b65f-b0736b97e003}">
+    <Summary>TODO: not implemented yet</Summary>
+    <Description></Description>
+    <Created>2020-08-03, 16:43:25</Created>
+    <Resource>
+      <Filename>ui/mainWindow.py</Filename>
+      <Linenumber>59</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{8474bde4-4ca8-42e3-9480-e6fef535732b}">
+    <Summary>TODO: not implemented yet</Summary>
+    <Description></Description>
+    <Created>2020-08-03, 16:43:25</Created>
+    <Resource>
+      <Filename>ui/mainWindow.py</Filename>
+      <Linenumber>93</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{05e8815b-a747-4bcf-b842-fd17ab9c002b}">
+    <Summary>TODO: not implemented yet</Summary>
+    <Description></Description>
+    <Created>2020-08-03, 16:43:25</Created>
+    <Resource>
+      <Filename>ui/mainWindow.py</Filename>
+      <Linenumber>104</Linenumber>
     </Resource>
   </Task>
 </Tasks>

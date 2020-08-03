@@ -9,6 +9,10 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtCore import QDate,  QTime,  QDateTime,  Qt
 from gpiozero import LED
 from time import sleep
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QPushButton
+
+
 
 from .Ui_mainWindow import Ui_MainWindow
 
@@ -55,6 +59,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # TODO: not implemented yet
         #raise NotImplementedError
         self.progressBar.setValue(0)
+        self.time.setText("Please put your items in the box")
+        self.time.repaint()
+        sleep(1)
+        # Message Box for item
+        QMessageBox.question(self,  "Put Item",  "<FONT COLOR = 'White'> Did you put items in the box? </FONT>",  
+        QMessageBox.No | QMessageBox.Yes)
+        
         self.time.setText("Finding the room...")
         self.time.repaint()
         self.progressBar.setValue(5)
@@ -92,3 +103,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         # TODO: not implemented yet
         #raise NotImplementedError
+    
+    @pyqtSlot()
+    def show_dialog(self):
+        msgBox = QMessageBox() 
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText("Have you put itmes in Box? ")
+        msgBox.setWindowTitle("Check Item!")
+        msgBox.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
+        
+        
+        
+    
