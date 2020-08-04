@@ -112,7 +112,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         msgBox.setText("Have you put itmes in Box? ")
         msgBox.setWindowTitle("Check Item!")
         msgBox.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
-        
-        
-        
-    
