@@ -42,15 +42,17 @@ class Ui_MainWindow(object):
         self.time.setAlignment(QtCore.Qt.AlignCenter)
         self.time.setObjectName("time")
         self.label = QtWidgets.QLabel(self.centralWidget)
-        self.label.setGeometry(QtCore.QRect(105, 20, 590, 51))
+        self.label.setGeometry(QtCore.QRect(0, 20, 800, 45))
         font = QtGui.QFont()
         font.setFamily("Piboto [Goog]")
-        font.setPointSize(28)
+        font.setPointSize(26)
         font.setBold(True)
         font.setItalic(False)
         font.setWeight(75)
         self.label.setFont(font)
+        self.label.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label.setStyleSheet("color: rgb(255, 255, 255)")
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.go = QtWidgets.QPushButton(self.centralWidget)
         self.go.setGeometry(QtCore.QRect(120, 270, 230, 150))
@@ -77,7 +79,7 @@ class Ui_MainWindow(object):
         self.comboBox.setStyleSheet("#comboBox\n"
 "{\n"
 "color: white;\n"
-"background:  rgb(52, 52, 52)\n"
+"background:  rgb(255, 255, 255)\n"
 "}")
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("")
