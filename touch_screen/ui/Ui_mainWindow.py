@@ -77,7 +77,7 @@ class Ui_MainWindow(object):
         self.comboBox.setStyleSheet("#comboBox\n"
 "{\n"
 "color: white;\n"
-"background:  rgb(255, 255, 255)\n"
+"background:  rgb(52, 52, 52)\n"
 "}")
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("")
