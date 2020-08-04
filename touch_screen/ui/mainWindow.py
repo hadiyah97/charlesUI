@@ -11,6 +11,7 @@ from PyQt5.QtCore import QDate,  QTime,  QDateTime,  Qt
 from time import sleep
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QPushButton
+import RPi.GPIO as GPIO
 
 
 
@@ -59,6 +60,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         # TODO: not implemented yet
         #raise NotImplementedError
+        #GPIO output
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(18,  GPIO.OUT)
+        #Default low 
+        GPIO.output(18,  GPIO.LOW)
+        
         self.progressBar.setValue(0)
         self.time.setText("Please put your items in the box")
         self.time.repaint()
@@ -82,6 +89,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         sleep(1.7)
         self.progressBar.setValue(100)
         #Set GPIO to high to trigger SJ2 
+
+        GPIO.output(18,  GPIO.HIGH)
+        sleep(2)
+        GPIO.output(18,  GPIO.LOW)
+        
+        
     
     @pyqtSlot(str)
     def on_comboBox_activated(self, p0):

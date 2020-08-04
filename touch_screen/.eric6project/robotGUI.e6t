@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Tasks SYSTEM "Tasks-6.0.dtd">
 <!-- eric6 tasks file for project robotGUI -->
-<!-- Saved: 2020-08-03, 19:39:07 -->
+<!-- Saved: 2020-08-03, 20:57:32 -->
 <Tasks version="6.0">
   <ProjectScanFilter></ProjectScanFilter>
-  <Task priority="1" completed="False" type="1" uid="{d8e94a0d-0f93-4db6-a34e-d277e6127474}">
+  <Task priority="1" completed="False" type="1" uid="{221f444d-3a86-4f38-8f4c-ac18d5f4f089}">
     <Summary>TODO: not implemented yet</Summary>
     <Description></Description>
-    <Created>2020-08-03, 19:39:03</Created>
+    <Created>2020-08-03, 20:57:29</Created>
     <Resource>
       <Filename>ui/mainWindow.py</Filename>
-      <Linenumber>45</Linenumber>
+      <Linenumber>46</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="1" uid="{032a9808-069b-4605-98ae-a27253697f85}">
+  <Task priority="1" completed="False" type="1" uid="{124911a7-17fc-499f-9de6-ded392868ec1}">
     <Summary>TODO: not implemented yet</Summary>
     <Description></Description>
-    <Created>2020-08-03, 19:39:03</Created>
+    <Created>2020-08-03, 20:57:29</Created>
     <Resource>
       <Filename>ui/mainWindow.py</Filename>
-      <Linenumber>60</Linenumber>
+      <Linenumber>61</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="1" uid="{7c12c8ab-71ad-4d1e-9a5c-fd42448742fb}">
+  <Task priority="1" completed="False" type="1" uid="{1f831128-9289-4a2d-bbfa-0033649bc051}">
     <Summary>TODO: not implemented yet</Summary>
     <Description></Description>
-    <Created>2020-08-03, 19:39:03</Created>
+    <Created>2020-08-03, 20:57:29</Created>
     <Resource>
       <Filename>ui/mainWindow.py</Filename>
-      <Linenumber>94</Linenumber>
+      <Linenumber>107</Linenumber>
     </Resource>
   </Task>
-  <Task priority="1" completed="False" type="1" uid="{bdd26b4b-b279-43dd-8569-85c020f44d0a}">
+  <Task priority="1" completed="False" type="1" uid="{a06016b1-d4f1-40d1-a17e-8dd72543590a}">
     <Summary>TODO: not implemented yet</Summary>
     <Description></Description>
-    <Created>2020-08-03, 19:39:03</Created>
+    <Created>2020-08-03, 20:57:29</Created>
     <Resource>
       <Filename>ui/mainWindow.py</Filename>
-      <Linenumber>105</Linenumber>
+      <Linenumber>118</Linenumber>
     </Resource>
   </Task>
 </Tasks>
