@@ -129,12 +129,9 @@ def get_shortest_path(matrix, start, end):
             node_order.reverse()  # reverse the nodes to get the correct order beginning with the start node
 
             # now print the path in the correct order.
-            list_length = len(node_order)
-            i = 0
-            while i < list_length:
-                print(node_order[i])
-                i = i + 1
-            return distance
+            # for i in node_order:
+            #     print(i)
+            return node_order
 
         # check if the neighbor above likes to be visited.
         if ((current_node.row-1) >= MIN_ROW) and (explored_nodes[current_node.row-1][current_node.column] is False):
@@ -162,8 +159,9 @@ def get_shortest_path(matrix, start, end):
 def get_directions(start_row, start_column, dest_room):
     if dest_room not in where_is_everything:
         print('Invalid destination was chosen. Please try again.\n')
+        return
     else:
-        get_shortest_path(data, Node(start_row, start_column), where_is_everything[dest_room])
+        return get_shortest_path(data, Node(start_row, start_column), where_is_everything[dest_room])
 
 
 if __name__ == '__main__':
